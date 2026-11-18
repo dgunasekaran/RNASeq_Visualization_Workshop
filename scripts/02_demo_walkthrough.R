@@ -32,7 +32,7 @@ coldata <- read_metadata("data/demo_metadata.csv", colnames(counts)) |>
   as_workshop_coldata()                                 # one row per sample, factors set
 counts  <- counts[, coldata$sample]                     # columns in design order
 dim(counts)
-coldata |> count(genotype, time)          # 2 x 3 design, 4 replicates each
+
 
 # Long ("tidy") format: one row per gene x sample — what ggplot2 wants
 counts_long <- as.data.frame(counts) |>
@@ -140,6 +140,8 @@ pheatmap::pheatmap(dists, annotation_col = ann, annotation_row = ann,
 # -----------------------------------------------------------------------------
 # For volcano we use the UNshrunken p-values with shrunken LFC (ashr keeps padj)
 p_volc <- plot_volcano(res_heat_wt, title = "WT: 20 min 39 °C vs 30 °C")
+p_volc$layers[[1]]$aes_params$size <- 1.5   # regular points (default 0.6)
+p_volc$layers[[2]]$aes_params$size <- 2.5   # triangles for padj = 0 (default 1.4)
 p_volc
 
 # MA plots: why shrink fold changes? (Zhu, Ibrahim & Love 2019)
