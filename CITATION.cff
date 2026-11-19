@@ -7,20 +7,33 @@ authors:
     given-names: Deepika
     affiliation: "University of California, Merced"
     email: dgunasekaran@ucmerced.edu
-    # orcid: "https://orcid.org/0000-0000-0000-0000"
+    orcid: "https://orcid.org/0000-0002-8227-7892"
 version: "1.0.0"
 date-released: "2026-11-20"
 license: MIT
 repository-code: "https://github.com/dgunasekaran/RNASeq_Visualization_Workshop"
-keywords: [RNA-seq, quality control, DESeq2, Shiny, data visualization, workshop]
+keywords: [RNA-seq, quality control, DESeq2, Shiny, data visualization]
 references:
   - type: article
     title: "A multi-omics dataset of heat-shock response in the yeast RNA binding protein Mip6"
     authors:
       - family-names: Nuño-Cabanes
-        given-names: Carme
+        given-names: C.
+      - family-names: Ugidos
+        given-names: M.
+      - family-names: Tarazona
+        given-names: S.
+      - family-names: Martín-Expósito
+        given-names: M.
+      - family-names: Ferrer
+        given-names: A.
+      - family-names: Rodríguez-Navarro
+        given-names: S.
+      - family-names: Conesa
+        given-names: A.
     journal: "Scientific Data"
     volume: 7
+    issue: 1
     start: 69
     year: 2020
     doi: "10.1038/s41597-020-0412-z"
@@ -28,13 +41,14 @@ references:
     title: "Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2"
     authors:
       - family-names: Love
-        given-names: Michael I.
+        given-names: M.I.
       - family-names: Huber
-        given-names: Wolfgang
+        given-names: W.
       - family-names: Anders
-        given-names: Simon
+        given-names: S.
     journal: "Genome Biology"
     volume: 15
+    issue: 12
     start: 550
     year: 2014
     doi: "10.1186/s13059-014-0550-8"
