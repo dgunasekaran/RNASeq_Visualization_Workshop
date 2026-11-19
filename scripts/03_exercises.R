@@ -26,6 +26,10 @@ counts_long <- as.data.frame(counts) |>
   pivot_longer(-gene_id, names_to = "sample", values_to = "count") |>
   left_join(coldata, by = "sample")
 
+# ---- Before Exercise 1: dplyr warm-up (10 one-liners) ----------------------
+
+
+
 # ---- Exercise 1: dplyr warm-up (5 min) --------------------------------------
 # 1a. Library size (millions) per sample, smallest first.
 lib <- counts_long |>

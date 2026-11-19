@@ -42,14 +42,18 @@ pc_ids  <- rownames(counts)[fclass == "protein_coding"]
 
 # Fit DESeq2 with ~ batch + condition, dropping batch if it is not estimable
 # (can happen after subsampling replicates).
+# Fit DESeq2 with ~ batch + condition, dropping batch if it is not estimable
+# (can happen after subsampling replicates: all drawn samples in one batch).
 fit_dds <- function(cnt, cd) {
   cd <- as.data.frame(cd)
   rownames(cd) <- cd$sample
   cd$condition <- droplevels(cd$condition)
   cd$batch <- droplevels(cd$batch)
-  design <- ~ batch + condition
-  mm <- model.matrix(~ batch + condition, cd)
-  if (nlevels(cd$batch) < 2 || qr(mm)$rank < ncol(mm)) design <- ~ condition
+  design <- ~ condition
+  if (nlevels(cd$batch) > 1) {                       # check BEFORE model.matrix()
+    mm <- model.matrix(~ batch + condition, cd)
+    if (qr(mm)$rank == ncol(mm)) design <- ~ batch + condition
+  }
   dds <- DESeqDataSetFromMatrix(cnt, cd, design)
   DESeq(dds, quiet = TRUE)
 }
@@ -127,8 +131,8 @@ p_batch <- as_tibble(pca_res$x[, 1:2]) |>
   theme_pub()
 
 save_pub((p_comp / p_marker) | p_batch, file.path(fig_dir, "A_matrix_overview.pdf"),
-         width_mm = 183, height_mm = 120)
-# Teaching point: the paper reports two culture days. The data say replicates
+         width_mm = 283, height_mm = 120)
+# The paper reports two culture days. The data say replicates
 # {1,3} and {2,4} pair up -> we model batch = B1 (1,3) / B2 (2,4).
 
 # =============================================================================
@@ -202,7 +206,7 @@ p_pca_syn <- ggplot(pca_df, aes(PC1, PC2)) +
        title = "Synthetic samples projected onto real-sample PCA") +
   theme_pub()
 save_pub(p_sat | p_pca_syn, file.path(fig_dir, "B_saturation_pca.pdf"),
-         width_mm = 183, height_mm = 80)
+         width_mm = 225, height_mm = 80)
 
 # Sample-to-sample correlation heatmap (real + synthetic)
 ann <- as.data.frame(panel$coldata[, c("condition", "synthetic")])
@@ -289,7 +293,7 @@ p_d4 <- ggplot(depth_de, aes(median_reads_M, n_de, colour = contrast)) +
   theme_pub()
 save_pub((p_d1 | p_d2) / (p_d3 | p_d4) + plot_annotation(tag_levels = "a"),
          file.path(fig_dir, "C_depth_subsampling.pdf"), width_mm = 183, height_mm = 130)
-# Teaching point: large effects (heat) are found at 1-2 M reads; subtle effects
+# Large effects (heat) are found at 1-2 M reads; subtle effects
 # (genotype) need depth AND replicates.
 
 # =============================================================================
