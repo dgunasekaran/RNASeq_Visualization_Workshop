@@ -11,14 +11,14 @@ A 1-hour hands-on workshop (20-min demo + 30-min exercises) on RNA-seq QC, norma
 
 ## Before you arrive: checklist
 
-Please finish these steps before the workshop. They take 30–45 minutes, mostly waiting for packages to install. The workshop itself is 60 minutes: a 20-minute live demo and 30 minutes of hands-on R. The rest of the time will be dedicated to troubleshooting and answering questions.
+Please finish these steps before the workshop. They take 30–45 minutes, mostly waiting for packages to install. The workshop itself is 90 minutes: a 20-minute live demo, and 30 minutes of hands-on R. The rest of the time will be dedicated to troubleshooting and answering questions.
 
 - [ ] R 4.6.x installed (see [Install R and RStudio](#install-r-and-rstudio))
 - [ ] RStudio Desktop installed
 - [ ] Workshop repository downloaded and opened as an RStudio project
-- [ ] `source("install_packages.R")` finished with "All core packages installed. You're ready!"
-- [ ] Count matrix present: `data/GSE135568_counts.csv` (it ships with the repo; optionally re-download it from GEO)
-- [ ] The app opens: `shiny::runApp("app")`
+- [ ] `source("scripts/install_workshop.R")` finished with "All core packages installed. You're ready!"
+- [ ] Count matrix present: `data/demo_counts.csv` (it ships with the repo; optionally re-download it from GEO)
+- [ ] The app opens: `shiny::runApp()`
 
 Bring a laptop with at least 8 GB RAM and 3 GB free disk space, and its charger. If anything fails, send the full error text during the workshop or Q/A session.
 
@@ -52,20 +52,20 @@ What is inside:
 
 | Path | What it is |
 | --- | --- |
-| `install_packages.R` | Installs and checks every package |
-| `data/GSE135568_counts.csv` | The count matrix (7,126 features × 24 samples) |
+| `scripts/install_workshop.R` | Installs and checks every package |
+| `data/demo_counts.csv` | The count matrix (7,126 features × 24 samples) |
 | `scripts/00_get_data.R` | Re-downloads the counts from GEO |
 | `scripts/01_qc_normalization_subsampling.R` | Depth and replicate subsampling, normalization, irregular-replicate experiments |
 | `scripts/02_demo_walkthrough.R` | The 20-minute live demo |
 | `scripts/03_exercises.R` | The 30-minute hands-on (fill the blanks) |
-| `app/app.R` | The Shiny dashboard |
+| `app.R` | The Shiny dashboard |
 
 ## Install the R packages
 
 With the project open, run this once in the RStudio Console. It installs about 25 CRAN and Bioconductor packages plus their dependencies and takes 10–25 minutes on a fresh R:
 
 ```r
-source("install_packages.R")
+source("scripts/install_workshop.R")
 ```
 
 If R asks *"Update all/some/none?"*, type `n`. If it asks *"Do you want to install from sources the packages which need compilation?"*, type `no`.
@@ -84,9 +84,9 @@ You are done when the Console ends with **"All N core packages installed … You
 
 We use the RNA-seq part of [GEO GSE135568](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE135568) from [Nuño-Cabanes et al. 2020, *Scientific Data* 7:69](https://doi.org/10.1038/s41597-020-0412-z): *S. cerevisiae* wild type and *mip6*Δ, at 30 °C and after 20 or 120 minutes at 39 °C, 4 biological replicates each (24 libraries, Illumina 100 bp paired-end, HTSeq counts on sacCer3).
 
-The repository already contains the counts as `data/GSE135568_counts.csv`. Downloading the original once is still worth it, so you know where public data lives. Pick one route:
+The repository already contains the counts as `data/demo_counts.csv`. Downloading the original once is optional. Pick one route:
 
-1. **In R (recommended):** `source("scripts/00_get_data.R")`. It uses `GEOquery::getGEOSuppFiles()` to fetch `GSE135568_CountMatrixRNAseq.xlsx` into `data/raw/`, falls back to a direct HTTPS download, checks the 24 columns, and rewrites `data/GSE135568_counts.csv` plus a sample table.
+1. **In R (optional):** `source("scripts/00_get_data.R")`. It uses `GEOquery::getGEOSuppFiles()` to fetch `GSE135568_CountMatrixRNAseq.xlsx` into `data/raw/`, falls back to a direct HTTPS download, checks the 24 columns, and rewrites `data/GSE135568_counts.csv` plus a sample table.
 2. **In the browser:** open the GEO page, scroll to **Supplementary file**, download `GSE135568_CountMatrixRNAseq.xlsx` (click *http* in the Download column), and save it in `data/raw/`. Then run step 1, which will find the file.
 
 What to expect in the file:
@@ -105,11 +105,12 @@ Raw reads (FASTQ) are in SRA under the same GEO series, e.g. run SRR9929263, a W
 In the RStudio Console, with the project open:
 
 ```r
-source("app/R/helpers.R")
-d <- load_workshop_data()
-dim(d$counts)                 # 7126   24
-table(d$coldata$group)        # 4 samples in each of 6 groups
-shiny::runApp("app")          # opens the dashboard; first load takes ~20 s
+source("scripts/workshop_helpers.R")
+counts <- read_counts("data/demo_counts.csv")
+coldata <- read_metadata("data/demo_metadata.csv", colnames(counts))
+dim(counts) # 7126 24
+table(coldata$condition) # 4 samples in each of 6 groups
+shiny::runApp() # opens the dashboard; first load takes ~20 s
 ```
 
 In the app, type **HSP104** in the gene search box. It should be highlighted on the volcano plot (Differential expression tab) and plotted in the Gene explorer tab. Close the app with the red **Stop** button in the Console. Optional: run `source("scripts/02_demo_walkthrough.R")` to produce the demo figures in `figures/02_demo/` (about 2 minutes).
@@ -118,7 +119,7 @@ In the app, type **HSP104** in the gene search box. It should be highlighted on 
 
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
-| `cannot open file 'app/R/helpers.R'` or `Could not find GSE135568_counts.csv` | Working directory is not the repository | Open `rnaseq-yeast-workshop.Rproj`, or *Session › Set Working Directory › To Project Directory* |
+| `cannot open file 'R/helpers.R'` or `Could not find demo_counts.csv` | Working directory is not the repository | Open `rnaseq-yeast-workshop.Rproj`, or *Session › Set Working Directory › To Project Directory* |
 | `Bioconductor version '3.xx' requires R version '4.x'` | Old R | Install R 4.6.x, restart RStudio, re-run `install_packages.R` |
 | `package 'X' is not available for this version of R` | Same, or a typo | Check `R.version.string`; then `BiocManager::install("X")` |
 | `lazy-load database ... is corrupt` | A package was updated while loaded | *Session › Restart R*, then run again |
