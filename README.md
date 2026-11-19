@@ -44,9 +44,9 @@ R.version.string    # should print R version 4.6.x
 
 The repository holds the scripts, the Shiny app and a copy of the count matrix. Repository link: this one (you are here).
 
-1. **Without git:** on the GitHub page click **Code › Download ZIP**, then unzip it somewhere without spaces or accents in the path (for example `Documents/rnaseq-yeast-workshop`).
+1. **Without git:** on the GitHub page click **Code › Download ZIP**, then unzip it somewhere without spaces or accents in the path (for example `Documents/RNASeq_Visualization_Workshop`).
 2. **With git:** in RStudio choose **File › New Project › Version Control › Git**, paste the repository URL and pick a folder.
-3. Open the project by double-clicking **`rnaseq-yeast-workshop.Rproj`**. The RStudio title bar should show the project name. Every script assumes this folder is the working directory.
+3. Open the project by double-clicking **`RNASeq_Visualization_Workshop.Rproj`**. The RStudio title bar should show the project name. Every script assumes this folder is the working directory.
 
 What is inside:
 
