@@ -9,6 +9,7 @@ authors:
     email: dgunasekaran@ucmerced.edu
     orcid: "https://orcid.org/0000-0002-8227-7892"
 version: "1.0.0"
+doi: "10.5281/zenodo.24381828"
 date-released: "2026-11-20"
 license: MIT
 repository-code: "https://github.com/dgunasekaran/RNASeq_Visualization_Workshop"
