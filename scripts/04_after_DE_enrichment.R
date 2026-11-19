@@ -57,8 +57,12 @@ if (file.exists("results/traj_clusters.csv")) {
 # ---- 5. Figures ---------------------------------------------------------------------
 save_pub(dotplot(ego_up, showCategory = 12) + theme_pub() + ggtitle("GO BP: up at 20 min (WT)"),
          "figures/04_enrichment/GO_up_dotplot.pdf", 140, 110)
-save_pub(emapplot(pairwise_termsim(ego_up), showCategory = 25),
-         "figures/04_enrichment/GO_up_emap.pdf", 183, 160)
-save_pub(p_gsea, "figures/04_enrichment/GSEA_GO_dotplot.pdf", 183, 120)
+tryCatch(
+  save_pub(emapplot(pairwise_termsim(ego_up), showCategory = 25),
+           "figures/04_enrichment/GO_up_emap.pdf", 183, 160),
+  error = function(e) message("Enrichment map skipped: ", conditionMessage(e),
+                              "\nUpdate ggraph and ggforce, restart R, and re-run.")
+)
+save_pub(p_gsea, "figures/04_enrichment/GSEA_GO_dotplot.pdf", 183, 260)
 save_pub(gseaplot2(gsea_go, geneSetID = 1:3, pvalue_table = TRUE),
-         "figures/04_enrichment/GSEA_running_score.pdf", 183, 120)
+         "figures/04_enrichment/GSEA_running_score.pdf", 225, 120)
