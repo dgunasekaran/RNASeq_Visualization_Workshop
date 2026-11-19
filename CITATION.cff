@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: "If you use this app or the workshop materials, please cite them as below."
+title: "RNASeq_Visualization_Workshop: RNA-seq QC and visualization in R with an interactive Shiny app"
+type: software
+authors:
+  - family-names: Gunasekaran
+    given-names: Deepika
+    affiliation: "University of California, Merced"
+    email: dgunasekaran@ucmerced.edu
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+version: "1.0.0"
+date-released: "2026-11-20"
+license: MIT
+repository-code: "https://github.com/dgunasekaran/RNASeq_Visualization_Workshop"
+keywords: [RNA-seq, quality control, DESeq2, Shiny, data visualization, workshop]
+references:
+  - type: article
+    title: "A multi-omics dataset of heat-shock response in the yeast RNA binding protein Mip6"
+    authors:
+      - family-names: Nuño-Cabanes
+        given-names: Carme
+    journal: "Scientific Data"
+    volume: 7
+    start: 69
+    year: 2020
+    doi: "10.1038/s41597-020-0412-z"
+  - type: article
+    title: "Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2"
+    authors:
+      - family-names: Love
+        given-names: Michael I.
+      - family-names: Huber
+        given-names: Wolfgang
+      - family-names: Anders
+        given-names: Simon
+    journal: "Genome Biology"
+    volume: 15
+    start: 550
+    year: 2014
+    doi: "10.1186/s13059-014-0550-8"
