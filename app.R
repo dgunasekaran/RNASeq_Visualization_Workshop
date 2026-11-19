@@ -248,10 +248,12 @@ server <- function(input, output, session) {
     } else {
       validate(need(input$f_counts, "Upload a count matrix and a metadata file (sidebar ▸ Data)."),
                need(input$f_meta, "Upload the sample metadata file."))
+      # Build the message only when reading failed: need() evaluates its message
+      # eagerly, and conditionMessage() of a successfully read matrix is an error.
       cnt <- tryCatch(read_counts(input$f_counts$datapath), error = function(e) e)
-      validate(need(!inherits(cnt, "error"), paste("Count matrix:", conditionMessage(cnt))))
+      if (inherits(cnt, "error")) validate(need(FALSE, paste("Count matrix:", conditionMessage(cnt))))
       cd <- tryCatch(read_metadata(input$f_meta$datapath, colnames(cnt)), error = function(e) e)
-      validate(need(!inherits(cd, "error"), paste("Metadata:", conditionMessage(cd))))
+      if (inherits(cd, "error")) validate(need(FALSE, paste("Metadata:", conditionMessage(cd))))
       ann <- if (!is.null(input$f_annot)) read_table_any(input$f_annot$datapath) else NULL
     }
     annot <- annotate_genes(rownames(cnt), ann)
@@ -572,18 +574,21 @@ server <- function(input, output, session) {
       geom_point(data = hl, colour = "black", fill = "#F0E442", shape = 21, size = 3.2) +
       geom_text(data = bind_rows(lab, hl), aes(label = symbol), colour = "black", size = 3, vjust = -0.9, check_overlap = TRUE) +
       scale_colour_manual(values = DE_COLOURS, drop = FALSE) +
+      # room above the top points and at the sides so gene labels are not clipped
+      scale_x_continuous(expand = expansion(mult = 0.08)) +
+      scale_y_continuous(expand = expansion(mult = c(0.02, 0.12))) +
       labs(x = "log2 fold change", y = "-log10 adjusted p", colour = NULL,
            title = paste(p$A, "vs", p$B), subtitle = capped_note(n_cap)) +
-      theme_pub()
+      theme_pub() + theme(legend.position = "bottom")
   })
   output$p_volcano <- renderPlotly({
     g <- volcano_gg()
     ttl <- g$labels$title                       # ggplotly drops subtitles: add it to the title
-    if (!is.null(g$labels$subtitle)) ttl <- paste0(ttl, "<br><sup>", g$labels$subtitle, "</sup>")
+    if (!is.null(g$labels$subtitle)) ttl <- paste0(ttl, "<br><sup>", gsub("\n", " ", g$labels$subtitle), "</sup>")
     ggplotly(g, tooltip = "text") |> layout(title = list(text = ttl)) |> toWebGL()
   })
   output$dl_volcano <- downloadHandler(function() paste0("volcano_", input$A, "_vs_", input$B, ".pdf"),
-                                       function(f) { g <- volcano_gg(); save_plot(g, f, 120, 100) })
+                                       function(f) { g <- volcano_gg(); save_plot(g, f, 130, 120) })
   output$p_ma <- renderPlotly({
     res <- de()$res; r <- filter(res, !is.na(padj))
     p <- ggplot(r, aes(baseMean, log2FoldChange, colour = status,

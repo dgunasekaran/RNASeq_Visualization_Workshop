@@ -335,10 +335,11 @@ volcano_y <- function(padj) {
   cap <- if (length(pos)) min(pos) / 10 else 1e-300
   -log10(ifelse(!is.na(padj) & padj == 0, cap, padj))
 }
-capped_note <- function(n) {
+capped_note <- function(n, width = 50) {
   if (!n) return(NULL)
-  sprintf("Triangles: %d gene%s with padj = 0 (below numerical precision), drawn at the top",
-          n, if (n > 1) "s" else "")
+  txt <- sprintf("Triangles: %d gene%s with padj = 0 (below numerical precision), drawn at the top",
+                 n, if (n > 1) "s" else "")
+  paste(strwrap(txt, width), collapse = "\n")   # ggplot does not wrap titles: wrap here
 }
 
 #' DT column renderer for p-values: 3 significant digits, and "< 1e-300" for 0.
