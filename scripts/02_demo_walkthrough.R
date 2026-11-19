@@ -244,68 +244,14 @@ p_quad <- ggplot(quad, aes(lfc_wt, lfc_mip6)) +
   theme_pub()
 p_quad
 
-# 6d. Trajectory clusters: genes that change over time (LRT), grouped by shape
-dds_lrt <- DESeq(dds_int, test = "LRT", reduced = ~ batch)
-res_lrt <- results(dds_lrt)
-lrt_genes <- rownames(res_lrt)[which(res_lrt$padj < 1e-10)]
-lrt_genes <- head(lrt_genes[order(res_lrt[lrt_genes, "padj"])], 1500)
-traj <- vmat_nb[lrt_genes, ]
-traj_means <- sapply(levels(cd$condition), \(g) rowMeans(traj[, cd$condition == g, drop = FALSE]))
-traj_z <- t(scale(t(traj_means)))
-km <- kmeans(traj_z, centers = 6, nstart = 25)
-dir.create("results", showWarnings = FALSE)
-write_csv(tibble(gene_id = names(km$cluster), cluster = paste0("C", km$cluster)),
-          "results/traj_clusters.csv")              # used by script 04 (compareCluster)
-traj_df <- as.data.frame(traj_z) |>
-  rownames_to_column("gene_id") |>
-  mutate(cluster = paste0("C", km$cluster)) |>
-  add_count(cluster, name = "n") |>
-  mutate(cluster = paste0(cluster, " (n = ", n, ")")) |>
-  pivot_longer(all_of(levels(cd$condition)), names_to = "condition", values_to = "z") |>
-  separate(condition, into = c("genotype", "time"), sep = "_") |>
-  mutate(time = factor(time, levels = c("0min", "20min", "120min")))
-p_traj <- ggplot(traj_df, aes(time, z, colour = genotype,
-                              group = interaction(gene_id, genotype))) +
-  geom_line(alpha = 0.04, linewidth = 0.2) +
-  stat_summary(aes(group = genotype), fun = median, geom = "line", linewidth = 0.9) +
-  facet_wrap(~ cluster, nrow = 2) +
-  scale_colour_manual(values = pal_genotype) +
-  labs(x = NULL, y = "Expression z-score", title = "Temporal response clusters (LRT genes)") +
-  theme_pub()
-p_traj
-
-# 6e. Gene-module scores: the Environmental Stress Response (Gasch et al. 2000)
-#     ribosomal protein genes go DOWN, chaperones go UP after heat shock.
-modules <- annot |>
-  mutate(module = case_when(
-    str_detect(symbol, "^RP[LS][0-9]") ~ "Ribosomal proteins",
-    str_detect(symbol, "^(HSP|SSA[34]|SSE2|HSP104)")  ~ "Heat-shock chaperones",
-    TRUE ~ NA_character_)) |>
-  filter(!is.na(module))
-score_df <- as.data.frame(t(scale(t(vmat_nb[modules$gene_id, ])))) |>
-  rownames_to_column("gene_id") |>
-  left_join(modules, by = "gene_id") |>
-  pivot_longer(all_of(cd$sample), names_to = "sample", values_to = "z") |>
-  group_by(module, sample) |>
-  summarise(score = mean(z), n_genes = n(), .groups = "drop") |>
-  left_join(coldata, by = "sample")
-p_mod <- ggplot(score_df, aes(time, score, colour = genotype)) +
-  geom_jitter(width = 0.12, height = 0, size = 1.3) +
-  stat_summary(aes(group = genotype), fun = mean, geom = "line") +
-  facet_wrap(~ module) +
-  scale_colour_manual(values = pal_genotype) +
-  labs(x = NULL, y = "Module score (mean z)", title = "Pathway-level view") +
-  theme_pub()
-p_mod
-
 # -----------------------------------------------------------------------------
 # Assemble a publication figure (183 mm = double column) ------------------------
 # -----------------------------------------------------------------------------
-fig1 <- (p_pca | p_volc | p_quad) / (p_rain) / (p_traj | p_mod) +
+fig1 <- (p_pca / p_quad / p_volc / p_rain) +
   plot_annotation(tag_levels = "a") +
-  plot_layout(heights = c(1, 0.8, 1.1))
-save_pub(fig1, file.path(fig_dir, "Figure1_heat_shock.pdf"), width_mm = 183, height_mm = 230)
-save_pub(fig1, file.path(fig_dir, "Figure1_heat_shock.png"), width_mm = 183, height_mm = 230, dpi = 300)
+  plot_layout(heights = c(0.8, 1.1, 1, 1.1))
+save_pub(fig1, file.path(fig_dir, "Figure1_heat_shock.pdf"), width_mm = 230, height_mm = 230)
+save_pub(fig1, file.path(fig_dir, "Figure1_heat_shock.png"), width_mm = 230, height_mm = 230, dpi = 300)
 save_pub(p_ma / p_phist, file.path(fig_dir, "FigureS_shrinkage_pvalues.pdf"), width_mm = 183, height_mm = 120)
 
 # Save results tables for the hands-on and for the app

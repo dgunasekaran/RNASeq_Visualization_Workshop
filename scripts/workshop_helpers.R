@@ -138,11 +138,32 @@ theme_pub <- function(base_size = 9, base_family = "") {
     )
 }
 
+#' TRUE if cairo_pdf actually works here. capabilities("cairo") can say TRUE
+#' while the device still fails to load (macOS without XQuartz:
+#' "failed to load cairo DLL"), so test it once and remember the answer.
+cairo_pdf_ok <- local({
+  ok <- NULL
+  function() {
+    if (is.null(ok)) {
+      ok <<- isTRUE(tryCatch({
+        f <- tempfile(fileext = ".pdf")
+        grDevices::cairo_pdf(f)
+        grDevices::dev.off()
+        unlink(f)
+        TRUE
+      }, error = function(e) FALSE, warning = function(w) FALSE))
+      if (!ok) message("cairo_pdf unavailable (on macOS, install XQuartz); ",
+                       "saving PDFs with the standard pdf device instead.")
+    }
+    ok
+  }
+})
+
 #' Save at journal sizes: 89 mm = single column, 183 mm = double column.
 save_pub <- function(plot, file, width_mm = 89, height_mm = 70, dpi = 600) {
   dir.create(dirname(file), showWarnings = FALSE, recursive = TRUE)
   dev <- NULL
-  if (grepl("\\.pdf$", file) && capabilities("cairo")) dev <- grDevices::cairo_pdf
+  if (grepl("\\.pdf$", file) && cairo_pdf_ok()) dev <- grDevices::cairo_pdf
   ggsave(file, plot, width = width_mm, height = height_mm, units = "mm",
          dpi = dpi, device = dev)
   invisible(file)
